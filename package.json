@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --config .prettierrc pages/**/*.{ts,tsx} --write"
+    "format": "prettier --config .prettierrc pages/**/*.{ts,tsx} types/**/*.{ts,tsx} lib/**/*.{ts,tsx} --write"
   },
   "dependencies": {
     "next": "12.1.6",
