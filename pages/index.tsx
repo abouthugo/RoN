@@ -1,25 +1,13 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import { io, Socket } from 'socket.io-client'
 import { useState, useEffect } from 'react'
+import connectToSocket from '../lib/connectToSocket'
 
-let socket: Socket<ServerToClientEvents, ClientToServerEvents>
+let socketAPI
 export default function Home() {
   const [message, setmessage] = useState('App name')
   useEffect(() => {
-    const socketInit = async () => {
-      await fetch('/api/socket')
-      socket = io()
-      socket.on('connect', () => {
-        console.log('Player connected')
-      })
-
-      socket.on('updateMessage', (msg) => {
-        setmessage(msg)
-      })
-    }
-    socketInit()
+    socketAPI = connectToSocket({ path: '/', msgHandler: setmessage })
   }, [])
 
   return (
@@ -31,7 +19,7 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <p>Work in progress...</p>
+        <p>{message}</p>
       </main>
 
       <footer className={styles.footer}></footer>
