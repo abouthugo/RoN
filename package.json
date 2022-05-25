@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:inspect": "cross-env NODE_OPTIONS='--inspect' next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@types/node": "^17.0.34",
     "@types/react": "^18.0.9",
+    "cross-env": "^7.0.3",
     "eslint": "8.15.0",
     "eslint-config-next": "12.1.6",
     "prettier": "^2.6.2",
