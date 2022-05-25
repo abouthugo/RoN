@@ -17,8 +17,10 @@ export default async function connectToSocket(config: ComponentConfigs) {
     }
     case '/admin': {
       const sendMsg = (msg: string) => {
-        pubToMessage(socket, msg)
+        pubMessage(socket, msg)
       }
+      socket.emit('authCheck')
+      subToClientList(socket, config.onClientUpdates)
       onConnect(socket, config.onConnect)
 
       return { sendMsg }
@@ -32,7 +34,7 @@ function subToMessages(socket: AppSocket, msgHandler: MessageHandler) {
   })
 }
 
-function pubToMessage(socket: AppSocket, msg: string) {
+function pubMessage(socket: AppSocket, msg: string) {
   socket.emit('message', msg)
 }
 
@@ -43,6 +45,13 @@ function onConnect(socket: AppSocket, handler: () => void) {
 function onSetName(socket: AppSocket, name: string) {
   socket.emit('checkIn', name)
   console.log(`Name has changed to: ${name}`)
+}
+
+function subToClientList(
+  socket: AppSocket,
+  handler: (s: ServerSocket[]) => void
+) {
+  socket.on('clientList', handler)
 }
 
 type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>

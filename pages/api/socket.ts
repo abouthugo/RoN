@@ -8,6 +8,7 @@ export default function socketIOHandler(
 ) {
   const socket = res.socket as EnhancedSocket
   let clients: ServerSocket[] = []
+  let adminId: string
   if (socket.server.io) {
     console.log('Socket already running')
   } else {
@@ -27,13 +28,21 @@ export default function socketIOHandler(
         socket.data.name = name
         clients.push(socket)
         console.log(`Name for this socket has changed to ${name}`)
+        if (adminId) io.to(adminId).emit('clientList', reducedClients(clients))
         printClients(clients)
       })
 
       socket.conn.on('close', () => {
         clients = clients.filter((v) => v.id !== socket.id)
         console.log(`${socket.data.name} left.`)
+        if (adminId) io.to(adminId).emit('clientList', reducedClients(clients))
         printClients(clients)
+      })
+
+      socket.on('authCheck', () => {
+        console.log('check emitted')
+        adminId = socket.id
+        io.to(adminId).emit('clientList', reducedClients(clients))
       })
     })
   }
@@ -49,13 +58,15 @@ function printClients(sockets: ServerSocket[]) {
   console.log('Clients: ', socketList)
 }
 
+function reducedClients(sockets: ServerSocket[]): IOClient[] {
+  const socketList = sockets.map((socket) => {
+    const { name } = socket.data
+    const { id } = socket
+    return { name, id }
+  })
+  return socketList
+}
+
 interface EnhancedSocket extends Socket {
   server: any
 }
-
-type ServerSocket = IOSocket<
-  ClientToServerEvents,
-  ServerToClientEvents,
-  InterServerEvents,
-  SocketData
->
