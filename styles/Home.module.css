@@ -76,6 +76,7 @@
 .card {
   margin: 1rem;
   padding: 1.5rem;
+  min-height: 5rem;
   text-align: left;
   color: inherit;
   text-decoration: none;
@@ -83,6 +84,9 @@
   border-radius: 10px;
   transition: color 0.15s ease, border-color 0.15s ease;
   max-width: 300px;
+  min-width: 300px;
+  background: black;
+  color: white;
 }
 
 .card:hover,
@@ -101,6 +105,22 @@
   margin: 0;
   font-size: 1.25rem;
   line-height: 1.5;
+}
+
+.card p::after {
+  content: "";
+  width: 4px;
+  height: 25px;
+  background: white;
+  display: inline-block;
+  transform: translateY(3px);
+  animation: cursor-blink 1.5s steps(2) infinite;
+}
+
+@keyframes cursor-blink {
+  0% {
+    opacity: 0;
+  }
 }
 
 .logo {

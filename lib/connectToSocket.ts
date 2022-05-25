@@ -2,17 +2,24 @@ import { io, Socket } from 'socket.io-client'
 
 export default async function connectToSocket(config: ComponentConfigs) {
   await fetch('/api/socket')
-  const socket = io()
+  const socket: AppSocket = io()
   switch (config.path) {
     case '/': {
       subToMessages(socket, config.msgHandler)
-      return null
+      const setName = (name: string) => {
+        onSetName(socket, name)
+      }
+      const resubToMessages = (f: MessageHandler) => {
+        subToMessages(socket, f)
+      }
+
+      return { setName, resubToMessages }
     }
     case '/admin': {
       const sendMsg = (msg: string) => {
         pubToMessage(socket, msg)
       }
-      onConnect(socket, config.onConnectHandler)
+      onConnect(socket, config.onConnect)
 
       return { sendMsg }
     }
@@ -32,3 +39,10 @@ function pubToMessage(socket: AppSocket, msg: string) {
 function onConnect(socket: AppSocket, handler: () => void) {
   socket.on('connect', handler)
 }
+
+function onSetName(socket: AppSocket, name: string) {
+  socket.emit('checkIn', name)
+  console.log(`Name has changed to: ${name}`)
+}
+
+type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>

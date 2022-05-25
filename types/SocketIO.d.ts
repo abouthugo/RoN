@@ -4,6 +4,7 @@ interface ServerToClientEvents {
 
 interface ClientToServerEvents {
   message: (msg: string) => void
+  checkIn: (name: string) => void
 }
 
 interface InterServerEvents {
@@ -11,18 +12,30 @@ interface InterServerEvents {
 }
 
 interface SocketData {
-  message: string
+  name: string
+  id: string
 }
 
 /**
  * Socket Hook Types
  */
-type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>
 type MessageHandler = (msg: string) => void
 type ComponentConfigs =
-  | { path: '/'; msgHandler: (msg: string) => void }
+  | {
+      path: '/'
+      msgHandler: MessageHandler
+      name: string
+    }
   | {
       path: '/admin'
-      onConnectHandler: () => void
-      msgHandler: (msg: string) => void
+      onConnect: () => void
+      msgHandler: MessageHandler
     }
+type AdminSocketAPI = {
+  sendMsg: (v: string) => void
+}
+
+type UserSocketAPI = {
+  setName: (name: string) => void
+  resubToMessages: (f: MessageHandler) => void
+}

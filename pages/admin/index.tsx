@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import connectToSocket from '../../lib/connectToSocket'
 
-let socketAPI: { sendMsg: MessageHandler }
+let socketAPI: AdminSocketAPI
 export default function AdminPage() {
   const [message, setmessage] = useState('')
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,19 +15,19 @@ export default function AdminPage() {
       const onConnect = () => {
         alert('Connected to socket')
       }
-      socketAPI = await connectToSocket({
+      socketAPI = (await connectToSocket({
         path: '/admin',
         msgHandler: setmessage,
-        onConnectHandler: onConnect
-      })
+        onConnect: onConnect
+      })) as AdminSocketAPI
     }
     socketInit()
   }, [])
 
   return (
-    <>
-      <h1>This is the admin page</h1>
+    <div>
+      <h1>broadcast a message</h1>
       <input name="message to users" value={message} onChange={handleChange} />
-    </>
+    </div>
   )
 }
