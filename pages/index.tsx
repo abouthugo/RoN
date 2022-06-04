@@ -4,13 +4,16 @@ import React, { useEffect, useContext } from 'react'
 import { GlobalCtx } from '../context/GlobalCtx'
 import connectToSocket from '../lib/connectToSocket'
 import AppRouting from '../components/AppRouting'
+import { useRouter } from 'next/router'
 
 let socketAPI: UserSocketAPI
 export default function Home() {
   const { state, dispatch } = useContext(GlobalCtx)
+  const router = useRouter()
 
   const handleClearStorage = () => {
     dispatch({ type: 'clearStorage' })
+    router.reload()
   }
 
   useEffect(() => {
@@ -42,7 +45,7 @@ export default function Home() {
           <div className={styles.card}>
             <p>{state.msg}</p>
           </div>
-          <button onClick={handleClearStorage}>Clear Storage</button>
+          <button onClick={handleClearStorage}>Log Out</button>
         </main>
 
         <footer className={styles.footer}></footer>
