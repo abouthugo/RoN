@@ -3,9 +3,14 @@ import Layout from './Layout'
 import styles from '../../styles/Game.module.css'
 
 const initialPosition = 100
-const speed = 1
 const initialTimeRemaining = 30
 export default function GreenLightRedLight() {
+  /**
+   * TODO:
+   * - timer results in game over
+   * -
+   */
+  const [speed, setSpeed] = useState(1)
   const [color, setColor] = useState('red')
   const [position, setPosition] = useState(initialPosition)
   const [timeRemaining, setTimeRemaining] = useState(initialTimeRemaining)
@@ -62,6 +67,8 @@ export default function GreenLightRedLight() {
     )
   }
 
+  if (timeRemaining < 1) return <h1>GG = get good</h1>
+
   return (
     <Layout>
       Time remaining: {timeRemaining} seconds
@@ -83,5 +90,3 @@ export default function GreenLightRedLight() {
     </Layout>
   )
 }
-
-function useTimer(setState) {}
