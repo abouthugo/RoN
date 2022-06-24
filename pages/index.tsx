@@ -28,8 +28,10 @@ export default function Home() {
       })) as UserSocketAPI
       dispatch({ type: 'setSocket', payload: socketAPI })
     }
-    socketInit()
-  }, [])
+    socketInit().then(() => {
+      socketAPI.requestSync()
+    })
+  }, [dispatch])
 
   return (
     <AppRouting>

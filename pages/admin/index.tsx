@@ -22,10 +22,15 @@ export default function AdminPage() {
         path: '/admin',
         msgHandler: setmessage,
         onConnect: onConnect,
-        onClientUpdates: (s) => setusers(s)
+        onClientUpdates: (s) => setusers(s),
+        onSyncMessage: (msg) => setmessage(msg)
       })) as AdminSocketAPI
     }
-    socketInit()
+
+    socketInit().then(() => {
+      // Request sync after render
+      socketAPI.requestSync()
+    })
     console.log('Render triggered')
   }, [])
 

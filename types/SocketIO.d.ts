@@ -1,5 +1,6 @@
 interface ServerToClientEvents {
   updateMessage: (msg: string) => void
+  messageSync: (msg: string) => void
   clientList: (clients: IOClient[]) => void
 }
 type IOClient = { name: string; id: string }
@@ -8,6 +9,7 @@ interface ClientToServerEvents {
   message: (msg: string) => void
   checkIn: (name: string) => void
   authCheck: () => void
+  requestSync: () => void
 }
 
 interface InterServerEvents {
@@ -34,14 +36,17 @@ type ComponentConfigs =
       onConnect: () => void
       msgHandler: MessageHandler
       onClientUpdates: (s: IOClient[]) => void
+      onSyncMessage: (msg: string) => void
     }
 type AdminSocketAPI = {
   sendMsg: (v: string) => void
+  requestSync: () => void
 }
 
 type UserSocketAPI = {
   setName: (name: string) => void
   resubToMessages: (f: MessageHandler) => void
+  requestSync: () => void
 }
 
 type ServerSocket = IOSocket<

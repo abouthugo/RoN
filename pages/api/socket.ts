@@ -8,6 +8,9 @@ export default function socketIOHandler(
 ) {
   const socket = res.socket as EnhancedSocket
   let clients: ServerSocket[] = []
+  const gameState = {
+    message: 'Welcome!'
+  }
   let adminId: string
   if (socket.server.io) {
     console.log('Socket already running')
@@ -21,6 +24,7 @@ export default function socketIOHandler(
     socket.server.io = io
     io.on('connection', (socket) => {
       socket.on('message', (msg) => {
+        gameState.message = msg
         socket.broadcast.emit('updateMessage', msg)
       })
 
@@ -43,6 +47,13 @@ export default function socketIOHandler(
         console.log('check emitted')
         adminId = socket.id
         io.to(adminId).emit('clientList', reducedClients(clients))
+      })
+
+      // Client requests a sync after render and the message is sent to the client
+      socket.on('requestSync', () => {
+        if (adminId && socket.id === adminId)
+          io.to(adminId).emit('messageSync', gameState.message)
+        else io.to(socket.id).emit('updateMessage', gameState.message)
       })
     })
   }
