@@ -3,6 +3,12 @@ import { io, Socket } from 'socket.io-client'
 export default async function connectToSocket(config: ComponentConfigs) {
   await fetch('/api/socket')
   const socket: AppSocket = io()
+
+  // Reusable function for both user types
+  const requestSync = () => {
+    socket.emit('requestSync')
+  }
+
   switch (config.path) {
     case '/': {
       subToMessages(socket, config.msgHandler)
@@ -13,7 +19,7 @@ export default async function connectToSocket(config: ComponentConfigs) {
         subToMessages(socket, f)
       }
 
-      return { setName, resubToMessages }
+      return { setName, resubToMessages, requestSync }
     }
     case '/admin': {
       const sendMsg = (msg: string) => {
@@ -21,9 +27,10 @@ export default async function connectToSocket(config: ComponentConfigs) {
       }
       socket.emit('authCheck')
       subToClientList(socket, config.onClientUpdates)
+      subToMessageSync(socket, config.onSyncMessage)
       onConnect(socket, config.onConnect)
 
-      return { sendMsg }
+      return { sendMsg, requestSync }
     }
   }
 }
@@ -52,6 +59,10 @@ function subToClientList(
   handler: (s: ServerSocket[]) => void
 ) {
   socket.on('clientList', handler)
+}
+
+function subToMessageSync(socket: AppSocket, handler: (s: string) => void) {
+  socket.on('messageSync', handler)
 }
 
 type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>
