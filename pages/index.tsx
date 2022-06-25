@@ -42,15 +42,19 @@ export default function Home() {
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
-        <main className={styles.main}>
-          <h1>Hi {state.name}! </h1>
+        <main className="grid gap-4 max-w-md mx-auto">
+          <h1 className="text-3xl">Hi {state.name}! </h1>
           <div className={styles.card}>
-            <p>{state.msg}</p>
+            <pre>
+              <code>&gt; {state.msg}</code>
+            </pre>
           </div>
-          <button onClick={handleClearStorage}>Log Out</button>
+          <div className="flex justify-end">
+            <button onClick={handleClearStorage} className="btn btn-link">
+              Log Out
+            </button>
+          </div>
         </main>
-
-        <footer className={styles.footer}></footer>
       </div>
     </AppRouting>
   )
