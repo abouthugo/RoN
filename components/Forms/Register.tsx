@@ -26,12 +26,23 @@ export default function Register() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div className={styles.main}>
-          <p>Welcome!</p>
+        <div className="grid gap-4 max-w-md mx-auto">
+          <h1 className="text-3xl">Welcome!</h1>
           <p>What should we call you?</p>
           <form onSubmit={handleNameSubmission}>
-            <input type="text" onChange={handleUserNameChange} value={name} />
-            <button type="submit">Submit</button>
+            <div className="form-control">
+              <div className="input-group">
+                <input
+                  type="text"
+                  className="input input-bordered"
+                  onChange={handleUserNameChange}
+                  value={name}
+                />
+                <button className="btn" type="submit">
+                  Submit
+                </button>
+              </div>
+            </div>
           </form>
         </div>
       </main>
