@@ -1,43 +1,63 @@
 .layout {
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-    height: 100vh; 
-    -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; 
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  height: 100vh;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
 }
 
 .pressbtn {
-    position: absolute;
-    bottom: 0px;
-    right: calc(50% - 40px);
-    border-radius: 12px 12px 0px 0px;
-    padding: 20px;
-    border: none;
-    background: grey;
+  position: absolute;
+  bottom: 0px;
+  right: calc(50% - 40px);
+  border-radius: 12px 12px 0px 0px;
+  padding: 20px;
+  border: none;
+  @apply bg-primary text-white;
 }
 
 .pressbtn:active {
-    background: green;
+  @apply bg-primary-focus;
 }
 
 .character {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    left: calc(50% - 25px);
-    border-radius: 50%;
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  left: calc(50% - 25px);
+  border-radius: 50%;
 }
 
 .finishline {
-    position: absolute;
-    width: 100vw;
-    height: 5px;
-    background: salmon;
-    left: 0;
-    top: 0px;
+  position: absolute;
+  width: 100vw;
+  height: 5px;
+  background: black;
+  left: 0;
+  top: 0px;
+
+  background-color: #eee;
+  background-image: linear-gradient(
+      45deg,
+      black 25%,
+      transparent 25%,
+      transparent 75%,
+      black 75%,
+      black
+    ),
+    linear-gradient(
+      45deg,
+      black 25%,
+      transparent 25%,
+      transparent 75%,
+      black 75%,
+      black
+    );
+  background-size: 20px 20px;
+  background-position: 0 0, 30px 30px;
 }
