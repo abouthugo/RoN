@@ -37,6 +37,7 @@ export default function Register() {
                   className="input input-bordered"
                   onChange={handleUserNameChange}
                   value={name}
+                  style={{ fontSize: '16px' }}
                 />
                 <button className="btn" type="submit">
                   Submit
