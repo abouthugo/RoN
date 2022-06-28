@@ -51,13 +51,13 @@ export default function GlassSteppingStones() {
     const mapper = (reverse = false) => {
       return function StackItem(s: StackItemType, i: number) {
         const commonStyles =
-          'transition-all ease-in-out delay-150 grid w-32 h-20 rounded bg-primary text-primary-content place-content-center cursor-pointer shadow'
+          'transition-all ease-in-out delay-150 grid w-32 h-20 rounded place-content-center cursor-pointer shadow'
         if (s.popped) return
         const isBroken =
           (reverse && s.broken === 'r') || (!reverse && s.broken === 'l')
         return (
           <div
-            className={`${commonStyles} ${bgSwitch(i)} ${
+            className={`${commonStyles} ${bgSwitch(s.position)} ${
               isBroken && 'invisible '
             }`}
             style={{ perspective: '100px' }}
@@ -95,8 +95,8 @@ export default function GlassSteppingStones() {
             className="stroke-current flex-shrink-0 w-6 h-6"
           >
             <path
-              stroke-lineCap="round"
-              stroke-lineJoin="round"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               strokeWidth="2"
               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             ></path>
