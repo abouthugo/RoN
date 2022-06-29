@@ -29,12 +29,15 @@ export default async function connectToSocket(config: ComponentConfigs) {
       const setGate = (open: boolean) => {
         socket.emit('setGate', open)
       }
+      const setGameModule = (gid: GameModuleId) => {
+        socket.emit('setGameModule', gid)
+      }
       socket.emit('authCheck')
       subToClientList(socket, config.onClientUpdates)
-      subToMessageSync(socket, config.onSyncMessage)
+      subToGameSync(socket, config.onSync)
       onConnect(socket, config.onConnect)
 
-      return { sendMsg, requestSync, setGate }
+      return { sendMsg, requestSync, setGate, setGameModule }
     }
   }
 }

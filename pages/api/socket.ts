@@ -12,9 +12,10 @@ export default function socketIOHandler(
 ) {
   const socket = res.socket as EnhancedSocket
   let clients: ServerSocket[] = []
-  const gameState = {
+  const gameState: ServerGameState = {
     message: 'Welcome!',
-    open: false
+    open: false,
+    activeModule: 'HOME'
   }
   let adminId: string
   if (socket.server.io) {
@@ -39,6 +40,7 @@ export default function socketIOHandler(
       socket.on('checkIn', (name) => {
         socket.leave(LOBBY)
         socket.data.name = name
+        socket.data.score = 0
         if (gameState.open) socket.join(GAME_ROOM)
         else socket.join(WAITING_ROOM)
 
@@ -56,7 +58,9 @@ export default function socketIOHandler(
       })
 
       socket.on('authCheck', () => {
+        socket.leave(LOBBY)
         console.log('check emitted')
+        console.log(gameState)
         adminId = socket.id
         io.to(adminId).emit('clientList', reducedClients(clients))
       })
@@ -64,7 +68,7 @@ export default function socketIOHandler(
       // Client requests a sync after render and the message is sent to the client
       socket.on('requestSync', () => {
         if (adminId && socket.id === adminId)
-          io.to(adminId).emit('messageSync', gameState.message)
+          io.to(adminId).emit('gameStateSync', gameState)
         else {
           io.to(socket.id).emit('updateMessage', gameState.message)
           io.to(socket.id).emit('gameStateSync', gameState)
@@ -85,6 +89,16 @@ export default function socketIOHandler(
           printClients(clients)
         }
       })
+
+      socket.on('setGameModule', (gid) => {
+        if (socket.id === adminId) {
+          console.log(`Admin is now changing the game module to ${gid}`)
+          gameState.activeModule = gid
+          io.to(WAITING_ROOM).to(LOBBY).emit('gameStateSync', gameState)
+          // we don't want to kick players out when the gates are closed
+          io.to(GAME_ROOM).emit('gameStateSync', { ...gameState, open: true })
+        }
+      })
     })
   }
   res.end()
@@ -102,9 +116,9 @@ function printClients(sockets: ServerSocket[]) {
 function reducedClients(sockets: ServerSocket[]): IOClient[] {
   const socketList = sockets.map((socket) => {
     const room: Room = socket.rooms.has(GAME_ROOM) ? GAME_ROOM : WAITING_ROOM
-    const { name } = socket.data
+    const { name, score } = socket.data
     const { id } = socket
-    return { name, id, room }
+    return { name, id, room, score }
   })
   return socketList
 }

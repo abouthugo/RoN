@@ -4,10 +4,27 @@ interface TableProps {
 
 export default function Table({ users }: TableProps) {
   const UserList = users.map((user, index) => {
+    const getIcon = () => {
+      switch (index) {
+        case 0:
+          return '🥇'
+        case 1:
+          return '🥈'
+        case 2:
+          return '🥉'
+        default:
+          return ''
+      }
+    }
     return (
       <tr key={user.id} className="hover">
         <th>{index + 1}</th>
-        <td>{user.name}</td>
+        <td>
+          <div className="indicator">
+            <span className="indicator-item indicator-start">{getIcon()}</span>
+            <div className="grid pl-2 place-items-center">{user.name}</div>
+          </div>
+        </td>
         <td>
           <label className="swap swap-rotate">
             <input type="checkbox" checked={user.room === 'game-room'} />
@@ -15,7 +32,11 @@ export default function Table({ users }: TableProps) {
             <div className="swap-off text-red-500">OFFLINE</div>
           </label>
         </td>
-        <td>{user.id}</td>
+        <td>
+          <div className="stat">
+            <div className="stat-value">{user.score}</div>
+          </div>
+        </td>
       </tr>
     )
   })
@@ -31,7 +52,7 @@ export default function Table({ users }: TableProps) {
                 <th></th>
                 <th>Name</th>
                 <th>Status</th>
-                <th>Id</th>
+                <th>Score</th>
               </tr>
             </thead>
             <tbody>{UserList}</tbody>

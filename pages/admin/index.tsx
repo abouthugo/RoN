@@ -3,10 +3,36 @@ import Table from '../../components/Forms/Table'
 import connectToSocket from '../../lib/connectToSocket'
 
 let socketAPI: AdminSocketAPI
+const GAME_MODULES: AdminGameState[] = [
+  {
+    name: 'Home',
+    id: 'HOME',
+    description: 'Initial greeting screen'
+  },
+  {
+    name: 'Green Light Red Light',
+    id: 'GLRL',
+    description: "Squid's game GLRL"
+  },
+  {
+    name: 'Number Guesser',
+    id: 'NMGR',
+    description: 'A game with a loop hole'
+  },
+  {
+    name: 'Stepping Stones',
+    id: 'SPSN',
+    description: 'Everyone might fail this'
+  }
+]
 export default function AdminPage() {
+  const [ready, setReady] = useState(false)
   const [message, setmessage] = useState('')
   const [checked, setChecked] = useState(false)
   const [users, setusers] = useState<IOClient[]>([])
+  const [activeModule, setActiveModule] = useState(
+    GAME_MODULES.find((i) => i.id === 'HOME')
+  )
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
@@ -19,10 +45,41 @@ export default function AdminPage() {
     socketAPI.setGate(!checked)
   }
 
+  const handleOnModuleChange = (id: GameModuleId) => {
+    setActiveModule(GAME_MODULES.find((m) => m.id === id))
+    socketAPI.setGameModule(id)
+  }
+
+  const ModsComponent = () => {
+    const list = GAME_MODULES.map((m) => {
+      return (
+        <input
+          key={m.id}
+          type="radio"
+          name="options"
+          data-title={m.id}
+          className="btn"
+          data-tip={m.description}
+          onChange={() => handleOnModuleChange(m.id)}
+          checked={activeModule.id === m.id}
+        />
+      )
+    })
+
+    return <div className="btn-group">{list}</div>
+  }
+
   useEffect(() => {
     const socketInit = async () => {
       const onConnect = () => {
         console.log('Connected to socket')
+      }
+
+      const onSync = (gs: ServerGameState) => {
+        setmessage(gs.message)
+        setActiveModule(GAME_MODULES.find((m) => m.id === gs.activeModule))
+        setChecked(gs.open)
+        setReady(true)
       }
 
       socketAPI = (await connectToSocket({
@@ -30,7 +87,7 @@ export default function AdminPage() {
         msgHandler: setmessage,
         onConnect: onConnect,
         onClientUpdates: (s) => setusers(s),
-        onSyncMessage: (msg) => setmessage(msg)
+        onSync
       })) as AdminSocketAPI
     }
 
@@ -41,6 +98,8 @@ export default function AdminPage() {
     console.log('Render triggered')
   }, [])
 
+  if (!ready)
+    return <progress className="progress progress-secondary w-full"></progress>
   return (
     <div className="container mx-auto  rounded-md mt-2 p-4 grid gap-6">
       <h1 className="text-3xl font-bold text-center">Admin Control Panel</h1>
@@ -77,6 +136,15 @@ export default function AdminPage() {
                 </label>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="card bg-base-100 shadow-md lg:col-span-2 sm:col-span-4">
+          <div className="card-body">
+            <div className="card-title">Active module: {activeModule.name}</div>
+          </div>
+          <div className="card-actions justify-center">
+            <ModsComponent />
           </div>
         </div>
       </div>
