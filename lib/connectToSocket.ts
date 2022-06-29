@@ -25,12 +25,15 @@ export default async function connectToSocket(config: ComponentConfigs) {
       const sendMsg = (msg: string) => {
         pubMessage(socket, msg)
       }
+      const setGate = (open: boolean) => {
+        socket.emit('setGate', open)
+      }
       socket.emit('authCheck')
       subToClientList(socket, config.onClientUpdates)
       subToMessageSync(socket, config.onSyncMessage)
       onConnect(socket, config.onConnect)
 
-      return { sendMsg, requestSync }
+      return { sendMsg, requestSync, setGate }
     }
   }
 }

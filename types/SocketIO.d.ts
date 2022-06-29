@@ -10,6 +10,7 @@ interface ClientToServerEvents {
   checkIn: (name: string) => void
   authCheck: () => void
   requestSync: () => void
+  setGate: (open: boolean) => void
 }
 
 interface InterServerEvents {
@@ -41,6 +42,7 @@ type ComponentConfigs =
 type AdminSocketAPI = {
   sendMsg: (v: string) => void
   requestSync: () => void
+  setGate: (open: boolean) => void
 }
 
 type UserSocketAPI = {

@@ -9,7 +9,8 @@ export default function socketIOHandler(
   const socket = res.socket as EnhancedSocket
   let clients: ServerSocket[] = []
   const gameState = {
-    message: 'Welcome!'
+    message: 'Welcome!',
+    open: false
   }
   let adminId: string
   if (socket.server.io) {
@@ -54,6 +55,14 @@ export default function socketIOHandler(
         if (adminId && socket.id === adminId)
           io.to(adminId).emit('messageSync', gameState.message)
         else io.to(socket.id).emit('updateMessage', gameState.message)
+      })
+
+      socket.on('setGate', (open) => {
+        if (socket.id === adminId) {
+          const gateState = open ? 'open' : 'closed'
+          gameState.open = open
+          console.log(`admin triggered new state gates are now ${gateState}`)
+        }
       })
     })
   }
