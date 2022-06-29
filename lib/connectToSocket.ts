@@ -12,6 +12,7 @@ export default async function connectToSocket(config: ComponentConfigs) {
   switch (config.path) {
     case '/': {
       subToMessages(socket, config.msgHandler)
+      subToGameSync(socket, config.gameStateHandler)
       const setName = (name: string) => {
         onSetName(socket, name)
       }
@@ -36,6 +37,12 @@ export default async function connectToSocket(config: ComponentConfigs) {
       return { sendMsg, requestSync, setGate }
     }
   }
+}
+
+function subToGameSync(socket: AppSocket, gameStateHandler: GameStateHandler) {
+  socket.on('gameStateSync', (gs) => {
+    gameStateHandler(gs)
+  })
 }
 
 function subToMessages(socket: AppSocket, msgHandler: MessageHandler) {

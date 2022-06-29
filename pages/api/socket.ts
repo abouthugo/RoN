@@ -2,6 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { Server, Socket as IOSocket } from 'socket.io'
 import { Socket } from 'net'
 
+const GAME_ROOM = 'game-room'
+const WAITING_ROOM = 'waiting-room'
+const LOBBY = 'lobby'
+
 export default function socketIOHandler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -24,15 +28,22 @@ export default function socketIOHandler(
     >(socket.server)
     socket.server.io = io
     io.on('connection', (socket) => {
+      // This is like the general channel. It will act as a passer for when the user has not logged in yet but still needs to listen to events that happen in both rooms
+      socket.join(LOBBY)
+
       socket.on('message', (msg) => {
         gameState.message = msg
         socket.broadcast.emit('updateMessage', msg)
       })
 
       socket.on('checkIn', (name) => {
+        socket.leave(LOBBY)
         socket.data.name = name
+        if (gameState.open) socket.join(GAME_ROOM)
+        else socket.join(WAITING_ROOM)
+
         clients.push(socket)
-        console.log(`Name for this socket has changed to ${name}`)
+        console.log(`${name} entered the server`)
         if (adminId) io.to(adminId).emit('clientList', reducedClients(clients))
         printClients(clients)
       })
@@ -54,14 +65,24 @@ export default function socketIOHandler(
       socket.on('requestSync', () => {
         if (adminId && socket.id === adminId)
           io.to(adminId).emit('messageSync', gameState.message)
-        else io.to(socket.id).emit('updateMessage', gameState.message)
+        else {
+          io.to(socket.id).emit('updateMessage', gameState.message)
+          io.to(socket.id).emit('gameStateSync', gameState)
+        }
       })
 
       socket.on('setGate', (open) => {
         if (socket.id === adminId) {
           const gateState = open ? 'open' : 'closed'
+          console.log(`admin triggered new state, gates are now ${gateState}`)
           gameState.open = open
-          console.log(`admin triggered new state gates are now ${gateState}`)
+          socket.to(WAITING_ROOM).to(LOBBY).emit('gameStateSync', gameState)
+          if (open) {
+            io.in(WAITING_ROOM).socketsJoin(GAME_ROOM)
+            io.socketsLeave(WAITING_ROOM)
+            io.to(adminId).emit('clientList', reducedClients(clients))
+          }
+          printClients(clients)
         }
       })
     })
@@ -73,18 +94,29 @@ function printClients(sockets: ServerSocket[]) {
   const socketList = sockets.map((socket) => {
     const { name } = socket.data
     const { id } = socket
-    return `${id} -> ${name}`
+    return `${id} -> ${name} rooms: ${getRooms(socket).join(', ')}`
   })
   console.log('Clients: ', socketList)
 }
 
 function reducedClients(sockets: ServerSocket[]): IOClient[] {
   const socketList = sockets.map((socket) => {
+    const room: Room = socket.rooms.has(GAME_ROOM) ? GAME_ROOM : WAITING_ROOM
     const { name } = socket.data
     const { id } = socket
-    return { name, id }
+    return { name, id, room }
   })
   return socketList
+}
+
+function getRooms(socket: ServerSocket): string[] {
+  const { id } = socket
+  const rooms = []
+  socket.rooms.forEach((v) => {
+    if (v === id) return
+    rooms.push(v)
+  })
+  return rooms
 }
 
 interface EnhancedSocket extends Socket {
