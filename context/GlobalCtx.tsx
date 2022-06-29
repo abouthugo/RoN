@@ -43,8 +43,11 @@ function init(): AppState {
     msg: 'Initial Message'
   }
 }
+
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
+    case 'setGameState':
+      return { ...state, gameState: action.payload }
     case 'setName':
       localStorage.setItem('user_name', action.payload)
       return { ...state, name: action.payload }
@@ -54,7 +57,7 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, msg: action.payload }
     case 'clearStorage':
       localStorage.removeItem('user_name')
-      return { ...state }
+      return init()
   }
 }
 

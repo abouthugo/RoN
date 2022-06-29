@@ -12,6 +12,7 @@ export default async function connectToSocket(config: ComponentConfigs) {
   switch (config.path) {
     case '/': {
       subToMessages(socket, config.msgHandler)
+      subToGameSync(socket, config.gameStateHandler)
       const setName = (name: string) => {
         onSetName(socket, name)
       }
@@ -25,14 +26,23 @@ export default async function connectToSocket(config: ComponentConfigs) {
       const sendMsg = (msg: string) => {
         pubMessage(socket, msg)
       }
+      const setGate = (open: boolean) => {
+        socket.emit('setGate', open)
+      }
       socket.emit('authCheck')
       subToClientList(socket, config.onClientUpdates)
       subToMessageSync(socket, config.onSyncMessage)
       onConnect(socket, config.onConnect)
 
-      return { sendMsg, requestSync }
+      return { sendMsg, requestSync, setGate }
     }
   }
+}
+
+function subToGameSync(socket: AppSocket, gameStateHandler: GameStateHandler) {
+  socket.on('gameStateSync', (gs) => {
+    gameStateHandler(gs)
+  })
 }
 
 function subToMessages(socket: AppSocket, msgHandler: MessageHandler) {
