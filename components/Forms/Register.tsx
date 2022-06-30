@@ -26,27 +26,43 @@ export default function Register() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div className="grid gap-4 max-w-md mx-auto">
-          <h1 className="text-3xl">Welcome!</h1>
-          <p>What should we call you?</p>
-          <form onSubmit={handleNameSubmission}>
+        <NewComp
+          handleNameSubmission={handleNameSubmission}
+          handleUserNameChange={handleUserNameChange}
+          name={name}
+        />
+      </main>
+    </div>
+  )
+}
+
+function NewComp({ handleNameSubmission, handleUserNameChange, name }) {
+  return (
+    <form onSubmit={handleNameSubmission}>
+      <div className="hero min-h-screen ">
+        <div className="hero-content">
+          <div className="max-w-md grid gap-4 mb-80">
+            <h1 className="text-5xl font-bold">Sign in</h1>
+            <h1 className="text-md">
+              Before you enter the server let us know what to call you
+            </h1>
             <div className="form-control">
               <div className="input-group">
                 <input
                   type="text"
                   className="input input-bordered"
+                  style={{ fontSize: '16px' }}
                   onChange={handleUserNameChange}
                   value={name}
-                  style={{ fontSize: '16px' }}
                 />
                 <button className="btn" type="submit">
-                  Submit
+                  Let{"'"}s go
                 </button>
               </div>
             </div>
-          </form>
+          </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </form>
   )
 }
