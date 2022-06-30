@@ -1,7 +1,7 @@
 interface ServerToClientEvents {
   updateMessage: (msg: string) => void
   messageSync: (msg: string) => void
-  clientList: (clients: IOClient[]) => void
+  clientList: (clients: IOClient[], history: ServerScoreLog[]) => void
   gameStateSync: (gameState: ServerGameState) => void
 }
 type Room = 'game-room' | 'waiting-room' | 'lobby'
@@ -14,6 +14,7 @@ interface ClientToServerEvents {
   requestSync: () => void
   setGate: (open: boolean) => void
   setGameModule: (gid: GameModuleId) => void
+  updateScore: (score: number, gid: GameModuleId) => void
 }
 
 interface InterServerEvents {
@@ -25,6 +26,7 @@ interface SocketData {
   id: string
   room: Room
   score: number
+  visited: Set<GameModuleId>
 }
 
 /**
@@ -44,7 +46,7 @@ type ComponentConfigs =
       path: '/admin'
       onConnect: () => void
       msgHandler: MessageHandler
-      onClientUpdates: (s: IOClient[]) => void
+      onClientUpdates: (s: IOClient[], history: ServerScoreLog[]) => void
       onSync: GameStateHandler
     }
 type AdminSocketAPI = {
@@ -58,6 +60,7 @@ type UserSocketAPI = {
   setName: (name: string) => void
   resubToMessages: (f: MessageHandler) => void
   requestSync: () => void
+  updateScore: (score: number, gid: GameModuleId) => void
 }
 
 type ServerSocket = IOSocket<
@@ -71,6 +74,14 @@ type ServerGameState = {
   message: string
   open: boolean
   activeModule: GameModuleId
+}
+
+type ServerScoreLog = {
+  time: string
+  gid: GameModuleId
+  score: number
+  playerId: string
+  playerName: string
 }
 
 type GameModuleId = 'HOME' | 'GLRL' | 'NMGR' | 'SPSN'

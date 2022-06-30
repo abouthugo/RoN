@@ -30,6 +30,7 @@ export default function AdminPage() {
   const [message, setmessage] = useState('')
   const [checked, setChecked] = useState(false)
   const [users, setusers] = useState<IOClient[]>([])
+  const [history, setHistory] = useState<ServerScoreLog[]>([])
   const [activeModule, setActiveModule] = useState(
     GAME_MODULES.find((i) => i.id === 'HOME')
   )
@@ -82,11 +83,16 @@ export default function AdminPage() {
         setReady(true)
       }
 
+      const onClientUpdates = (s: IOClient[], l: ServerScoreLog[]) => {
+        setusers(s)
+        setHistory(l)
+      }
+
       socketAPI = (await connectToSocket({
         path: '/admin',
         msgHandler: setmessage,
         onConnect: onConnect,
-        onClientUpdates: (s) => setusers(s),
+        onClientUpdates: onClientUpdates,
         onSync
       })) as AdminSocketAPI
     }
@@ -150,7 +156,7 @@ export default function AdminPage() {
         </div>
       </div>
       {/* Table */}
-      <Table users={users} />
+      <Table users={users} history={history} activeGid={activeModule.id} />
     </div>
   )
 }

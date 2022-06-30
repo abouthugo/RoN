@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import Layout from './Layout'
 import styles from '../../styles/Game.module.css'
+import { GlobalCtx } from '../../context/GlobalCtx'
 
 const initialPosition = 75
 const initialTimeRemaining = 30
 export default function GreenLightRedLight() {
+  const { state } = useContext(GlobalCtx)
   const [speed, setSpeed] = useState(1)
   const [motionState, setMotionState] = useState('idle')
   const [position, setPosition] = useState(initialPosition)
@@ -72,16 +74,27 @@ export default function GreenLightRedLight() {
     stopMoving()
   }
 
-  if (gameover) return <GameOverScreen />
+  const onGameOver = (stop = false, score: number) => {
+    if (stop) setMotionState('idle')
+    if (state.userSocket)
+      state.userSocket.updateScore(
+        timeRemaining > 0 ? score * timeRemaining : score,
+        'GLRL'
+      )
+  }
+
+  if (gameover)
+    return <GameOverScreen onGameOver={() => onGameOver(false, 0)} />
   if (
     typeof window !== 'undefined' &&
     window.innerHeight - (position + 50) <= 0
   ) {
     stopMoving()
-    return <CongratsScreen onLoad={() => setMotionState('idle')} />
+    return <CongratsScreen onLoad={() => onGameOver(true, 10)} />
   }
 
-  if (timeRemaining < 1) return <GameOverScreen />
+  if (timeRemaining < 1)
+    return <GameOverScreen onGameOver={() => onGameOver(false, 0)} />
 
   const style = {
     '--value': 100 * ((timeRemaining - 1) / initialTimeRemaining),
@@ -141,7 +154,11 @@ function Semaphore({ light }) {
   )
 }
 
-function GameOverScreen() {
+function GameOverScreen({ onGameOver }) {
+  useEffect(() => {
+    onGameOver()
+  }, [])
+
   return (
     <div className="hero min-h-screen bg-base-200">
       <div className="hero-content text-center">

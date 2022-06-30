@@ -20,7 +20,11 @@ export default async function connectToSocket(config: ComponentConfigs) {
         subToMessages(socket, f)
       }
 
-      return { setName, resubToMessages, requestSync }
+      const updateScore = (score: number, gid: GameModuleId) => {
+        socket.emit('updateScore', score, gid)
+      }
+
+      return { setName, resubToMessages, requestSync, updateScore }
     }
     case '/admin': {
       const sendMsg = (msg: string) => {
@@ -69,7 +73,7 @@ function onSetName(socket: AppSocket, name: string) {
 
 function subToClientList(
   socket: AppSocket,
-  handler: (s: ServerSocket[]) => void
+  handler: (s: ServerSocket[], history: ServerScoreLog[]) => void
 ) {
   socket.on('clientList', handler)
 }

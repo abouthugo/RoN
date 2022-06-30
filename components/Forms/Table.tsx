@@ -1,14 +1,31 @@
 import styles from '../../styles/Home.module.css'
 interface TableProps {
   users: IOClient[]
+  history: ServerScoreLog[]
+  activeGid: GameModuleId
 }
 
-export default function Table({ users }: TableProps) {
-  const UserList = users.map((user, index) => {
+export default function Table({ users, history, activeGid }: TableProps) {
+  const getScoreInHistory = (gid: GameModuleId, id: string) => {
+    return history.find((i) => i.gid === gid && i.playerId === id)?.score || 0
+  }
+
+  const historyExists = (id: string) => {
+    return !history.find((i) => i.gid === activeGid && i.playerId === id)
+  }
+
+  const sortByScore = (a, b) => {
+    return b.score - a.score
+  }
+  const UserList = users.sort(sortByScore).map((user, index) => {
+    const { id } = user
+    const glrlScore = getScoreInHistory('GLRL', id)
+    const nmgrScore = getScoreInHistory('NMGR', id)
+    const spsnScore = getScoreInHistory('SPSN', id)
     const getIcon = () => {
       switch (index) {
         case 0:
-          return '🥇'
+          return '👑'
         case 1:
           return '🥈'
         case 2:
@@ -18,7 +35,7 @@ export default function Table({ users }: TableProps) {
       }
     }
     return (
-      <tr key={user.id} className="hover">
+      <tr key={id} className="hover">
         <th>{index + 1}</th>
         <td>
           <div className="indicator">
@@ -35,8 +52,30 @@ export default function Table({ users }: TableProps) {
         </td>
         <td>
           <div className="stat">
+            <div className="stat-value">{glrlScore}</div>
+          </div>
+        </td>
+        <td>
+          <div className="stat">
+            <div className="stat-value">{nmgrScore}</div>
+          </div>
+        </td>
+        <td>
+          <div className="stat">
+            <div className="stat-value">{spsnScore}</div>
+          </div>
+        </td>
+        <td>
+          <div className="stat">
             <div className="stat-value">{user.score}</div>
           </div>
+        </td>
+        <td>
+          <label className="swap swap-flip text-2xl">
+            <input type="checkbox" checked={historyExists(id)} />
+            <div className="swap-on">🎮</div>
+            <div className="swap-off">✅</div>
+          </label>
         </td>
       </tr>
     )
@@ -55,7 +94,11 @@ export default function Table({ users }: TableProps) {
                 <th></th>
                 <th>Name</th>
                 <th>Status</th>
-                <th>Score</th>
+                <th>GLRL 🚦</th>
+                <th>NMGR 🎲</th>
+                <th>SPSN 💎</th>
+                <th>Total Score</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>{UserList}</tbody>
