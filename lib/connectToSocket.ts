@@ -20,7 +20,11 @@ export default async function connectToSocket(config: ComponentConfigs) {
         subToMessages(socket, f)
       }
 
-      return { setName, resubToMessages, requestSync }
+      const updateScore = (score: number, gid: GameModuleId) => {
+        socket.emit('updateScore', score, gid)
+      }
+
+      return { setName, resubToMessages, requestSync, updateScore }
     }
     case '/admin': {
       const sendMsg = (msg: string) => {
@@ -29,12 +33,15 @@ export default async function connectToSocket(config: ComponentConfigs) {
       const setGate = (open: boolean) => {
         socket.emit('setGate', open)
       }
+      const setGameModule = (gid: GameModuleId) => {
+        socket.emit('setGameModule', gid)
+      }
       socket.emit('authCheck')
       subToClientList(socket, config.onClientUpdates)
-      subToMessageSync(socket, config.onSyncMessage)
+      subToGameSync(socket, config.onSync)
       onConnect(socket, config.onConnect)
 
-      return { sendMsg, requestSync, setGate }
+      return { sendMsg, requestSync, setGate, setGameModule }
     }
   }
 }
@@ -66,7 +73,7 @@ function onSetName(socket: AppSocket, name: string) {
 
 function subToClientList(
   socket: AppSocket,
-  handler: (s: ServerSocket[]) => void
+  handler: (s: ServerSocket[], history: ServerScoreLog[]) => void
 ) {
   socket.on('clientList', handler)
 }

@@ -1,11 +1,11 @@
 interface ServerToClientEvents {
   updateMessage: (msg: string) => void
   messageSync: (msg: string) => void
-  clientList: (clients: IOClient[]) => void
+  clientList: (clients: IOClient[], history: ServerScoreLog[]) => void
   gameStateSync: (gameState: ServerGameState) => void
 }
 type Room = 'game-room' | 'waiting-room' | 'lobby'
-type IOClient = { name: string; id: string; room: Room }
+type IOClient = { name: string; id: string; room: Room; score: number }
 
 interface ClientToServerEvents {
   message: (msg: string) => void
@@ -13,6 +13,8 @@ interface ClientToServerEvents {
   authCheck: () => void
   requestSync: () => void
   setGate: (open: boolean) => void
+  setGameModule: (gid: GameModuleId) => void
+  updateScore: (score: number, gid: GameModuleId) => void
 }
 
 interface InterServerEvents {
@@ -23,6 +25,8 @@ interface SocketData {
   name: string
   id: string
   room: Room
+  score: number
+  visited: Set<GameModuleId>
 }
 
 /**
@@ -42,19 +46,21 @@ type ComponentConfigs =
       path: '/admin'
       onConnect: () => void
       msgHandler: MessageHandler
-      onClientUpdates: (s: IOClient[]) => void
-      onSyncMessage: (msg: string) => void
+      onClientUpdates: (s: IOClient[], history: ServerScoreLog[]) => void
+      onSync: GameStateHandler
     }
 type AdminSocketAPI = {
   sendMsg: (v: string) => void
   requestSync: () => void
   setGate: (open: boolean) => void
+  setGameModule: (gid: GameModuleId) => void
 }
 
 type UserSocketAPI = {
   setName: (name: string) => void
   resubToMessages: (f: MessageHandler) => void
   requestSync: () => void
+  updateScore: (score: number, gid: GameModuleId) => void
 }
 
 type ServerSocket = IOSocket<
@@ -67,4 +73,20 @@ type ServerSocket = IOSocket<
 type ServerGameState = {
   message: string
   open: boolean
+  activeModule: GameModuleId
+}
+
+type ServerScoreLog = {
+  time: string
+  gid: GameModuleId
+  score: number
+  playerId: string
+  playerName: string
+}
+
+type GameModuleId = 'HOME' | 'GLRL' | 'NMGR' | 'SPSN'
+type AdminGameState = {
+  name: string
+  id: GameModuleId
+  description: string
 }

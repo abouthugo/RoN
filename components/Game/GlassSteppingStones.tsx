@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import { GlobalCtx } from '../../context/GlobalCtx'
 
 const totalLevels = 4
 const initialStack = generateStack(totalLevels)
+const allowReset = false
 export default function GlassSteppingStones() {
+  const { state } = useContext(GlobalCtx)
   const [stack, setstack] = useState<StackItemType[]>(initialStack)
   const [activeLevel, setActiveLevel] = useState(0)
   const [gameOver, setGameOver] = useState(false)
@@ -31,6 +34,19 @@ export default function GlassSteppingStones() {
     } else
       setTimeout(() => {
         setGameOver(true)
+        const score = () => {
+          switch (activeLevel) {
+            case 1:
+              return 25
+            case 2:
+              return 50
+            case 3:
+              return 75
+            case 4:
+              return 150
+          }
+        }
+        state.userSocket.updateScore(score(), 'SPSN')
         setActiveLevel(-1)
       }, 250)
   }
@@ -110,6 +126,7 @@ export default function GlassSteppingStones() {
   const message = () => {
     switch (true) {
       case gameOver && activeLevel === totalLevels:
+        state.userSocket.updateScore(150, 'SPSN')
         return 'YOU WIN! 🎉'
       case gameOver && activeLevel < 0:
         return '❌ Game over ❌'
@@ -128,7 +145,7 @@ export default function GlassSteppingStones() {
         <StackComp />
       </div>
       <div className="col-span-12 row-span-1 box-border text-center flex justify-center items-center">
-        {gameOver && (
+        {allowReset && gameOver && (
           <button className="btn btn-primary" onClick={handleOnReset}>
             Reset
           </button>

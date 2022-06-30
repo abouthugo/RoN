@@ -6,16 +6,6 @@
   @apply mockup-code bg-black text-white;
 }
 
-.card pre::after {
-  content: '';
-  width: 2px;
-  height: 22px;
-  background: white;
-  display: inline-block;
-  transform: translateY(3px);
-  animation: cursor-blink 1.5s steps(2) infinite;
-}
-
 @keyframes cursor-blink {
   0% {
     opacity: 0;
@@ -32,4 +22,15 @@
     width: 100%;
     flex-direction: column;
   }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

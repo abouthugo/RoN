@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { GlobalCtx } from '../../context/GlobalCtx'
 
 type HintValues = 'not taken' | 'taken' | 'ignored'
 type GuessValues = number | undefined
 export default function NumberGuesser() {
+  const { state } = useContext(GlobalCtx)
   const [gameState, setgameState] = useState(generateRandomGrid())
   const [hintTaken, setHintTaken] = useState<HintValues>('not taken')
   const [guess, setGuess] = useState<GuessValues>(undefined)
@@ -132,11 +134,12 @@ export default function NumberGuesser() {
   const message = () => {
     switch (true) {
       case gameOver && guess && getSum() === guess:
+        state.userSocket.updateScore(30, 'NMGR')
         return '👀 Holy cow you guessed it! Enjoy your 30 points'
       case gameOver:
-        return `You get ${
-          hintTaken === 'taken' ? getSum() / 2 : getSum()
-        } points.`
+        const points = hintTaken === 'taken' ? getSum() / 2 : getSum()
+        state.userSocket.updateScore(points, 'NMGR')
+        return `You get ${points} points.`
       case hintTaken === 'taken' && getSelection().count > 0 && guessLocked:
         return 'Select your last cell'
       case hintTaken === 'taken' && getSelection().count > 0:

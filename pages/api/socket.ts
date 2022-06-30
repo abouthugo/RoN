@@ -12,9 +12,11 @@ export default function socketIOHandler(
 ) {
   const socket = res.socket as EnhancedSocket
   let clients: ServerSocket[] = []
-  const gameState = {
+  const log: ServerScoreLog[] = []
+  const gameState: ServerGameState = {
     message: 'Welcome!',
-    open: false
+    open: false,
+    activeModule: 'HOME'
   }
   let adminId: string
   if (socket.server.io) {
@@ -39,32 +41,38 @@ export default function socketIOHandler(
       socket.on('checkIn', (name) => {
         socket.leave(LOBBY)
         socket.data.name = name
+        socket.data.score = 0
+        socket.data.visited = new Set()
         if (gameState.open) socket.join(GAME_ROOM)
         else socket.join(WAITING_ROOM)
 
         clients.push(socket)
         console.log(`${name} entered the server`)
-        if (adminId) io.to(adminId).emit('clientList', reducedClients(clients))
+        if (adminId)
+          io.to(adminId).emit('clientList', reducedClients(clients), log)
         printClients(clients)
       })
 
       socket.conn.on('close', () => {
         clients = clients.filter((v) => v.id !== socket.id)
         console.log(`${socket.data.name} left.`)
-        if (adminId) io.to(adminId).emit('clientList', reducedClients(clients))
+        if (adminId)
+          io.to(adminId).emit('clientList', reducedClients(clients), log)
         printClients(clients)
       })
 
       socket.on('authCheck', () => {
+        socket.leave(LOBBY)
         console.log('check emitted')
+        console.log(gameState)
         adminId = socket.id
-        io.to(adminId).emit('clientList', reducedClients(clients))
+        io.to(adminId).emit('clientList', reducedClients(clients), log)
       })
 
       // Client requests a sync after render and the message is sent to the client
       socket.on('requestSync', () => {
         if (adminId && socket.id === adminId)
-          io.to(adminId).emit('messageSync', gameState.message)
+          io.to(adminId).emit('gameStateSync', gameState)
         else {
           io.to(socket.id).emit('updateMessage', gameState.message)
           io.to(socket.id).emit('gameStateSync', gameState)
@@ -80,10 +88,35 @@ export default function socketIOHandler(
           if (open) {
             io.in(WAITING_ROOM).socketsJoin(GAME_ROOM)
             io.socketsLeave(WAITING_ROOM)
-            io.to(adminId).emit('clientList', reducedClients(clients))
+            io.to(adminId).emit('clientList', reducedClients(clients), log)
           }
           printClients(clients)
         }
+      })
+
+      socket.on('setGameModule', (gid) => {
+        if (socket.id === adminId) {
+          console.log(`Admin is now changing the game module to ${gid}`)
+          gameState.activeModule = gid
+          io.to(WAITING_ROOM).to(LOBBY).emit('gameStateSync', gameState)
+          // we don't want to kick players out when the gates are closed
+          io.to(GAME_ROOM).emit('gameStateSync', { ...gameState, open: true })
+        }
+      })
+
+      socket.on('updateScore', (score, gid) => {
+        // prevent subsequent requests, only take the first one
+        if (socket.data.visited.has(gid)) return
+        socket.data.visited.add(gid)
+        socket.data.score += score
+        log.push({
+          time: new Date().toISOString(),
+          gid,
+          score,
+          playerId: socket.id,
+          playerName: socket.data.name
+        })
+        io.to(adminId).emit('clientList', reducedClients(clients), log)
       })
     })
   }
@@ -102,9 +135,9 @@ function printClients(sockets: ServerSocket[]) {
 function reducedClients(sockets: ServerSocket[]): IOClient[] {
   const socketList = sockets.map((socket) => {
     const room: Room = socket.rooms.has(GAME_ROOM) ? GAME_ROOM : WAITING_ROOM
-    const { name } = socket.data
+    const { name, score } = socket.data
     const { id } = socket
-    return { name, id, room }
+    return { name, id, room, score }
   })
   return socketList
 }
