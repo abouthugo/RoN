@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import Head from 'next/head'
+import React, { useState, useEffect, Children } from 'react'
 import Table from '../../components/Forms/Table'
 import connectToSocket from '../../lib/connectToSocket'
 
@@ -105,58 +106,80 @@ export default function AdminPage() {
   }, [])
 
   if (!ready)
-    return <progress className="progress progress-secondary w-full"></progress>
-  return (
-    <div className="container mx-auto  rounded-md mt-2 p-4 grid gap-6">
-      <h1 className="text-3xl font-bold text-center">Admin Control Panel</h1>
-      {/* Grid of cards */}
-      <div className="grid grid-cols-8 place-content-center gap-10">
-        <div className="card bg-base-100 shadow-md lg:col-span-2 sm:col-span-4">
-          <div className="card-body">
-            <h2 className="card-title">Broadcast</h2>
-            <div className="card-actions justify-center">
-              <input
-                name="message to users"
-                value={message}
-                onChange={handleChange}
-                type="text"
-                placeholder="Type here"
-                className="input input-bordered w-full max-w-xs"
-              />
-              <span className="">- {message.length} characters -</span>
-            </div>
-          </div>
-        </div>
+    return (
+      <AdminHeader>
+        <progress className="progress progress-secondary w-full"></progress>
+      </AdminHeader>
+    )
 
-        <div className="grid card bg-base-100 shadow-md place-content-center lg:col-span-2 sm:col-span-4">
-          <div className="card-body">
-            <div className="class-actions">
-              <div className="form-control">
-                <label className="label cursor-pointer gap-5">
-                  <span className="label-text">Open the gates</span>
-                  <input
-                    type="checkbox"
-                    className="toggle toggle-primary"
-                    onChange={handleCheck}
-                    checked={checked}
-                  />
-                </label>
+  return (
+    <AdminHeader>
+      <div className="container mx-auto  rounded-md mt-2 p-4 grid gap-6">
+        <h1 className="text-3xl font-bold text-center">Admin Control Panel</h1>
+        {/* Grid of cards */}
+        <div className="grid grid-cols-8 place-content-center gap-10">
+          <div className="card bg-base-100 shadow-md lg:col-span-2 sm:col-span-4">
+            <div className="card-body">
+              <h2 className="card-title">Broadcast</h2>
+              <div className="card-actions justify-center">
+                <input
+                  name="message to users"
+                  value={message}
+                  onChange={handleChange}
+                  type="text"
+                  placeholder="Type here"
+                  className="input input-bordered w-full max-w-xs"
+                />
+                <span className="">- {message.length} characters -</span>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="card bg-base-100 shadow-md lg:col-span-2 sm:col-span-4">
-          <div className="card-body">
-            <div className="card-title">Active module: {activeModule.name}</div>
+          <div className="grid card bg-base-100 shadow-md place-content-center lg:col-span-2 sm:col-span-4">
+            <div className="card-body">
+              <div className="class-actions">
+                <div className="form-control">
+                  <label className="label cursor-pointer gap-5">
+                    <span className="label-text">Open the gates</span>
+                    <input
+                      type="checkbox"
+                      className="toggle toggle-primary"
+                      onChange={handleCheck}
+                      checked={checked}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="card-actions justify-center">
-            <ModsComponent />
+
+          <div className="card bg-base-100 shadow-md lg:col-span-2 sm:col-span-4">
+            <div className="card-body">
+              <div className="card-title">
+                Active module: {activeModule.name}
+              </div>
+            </div>
+            <div className="card-actions justify-center">
+              <ModsComponent />
+            </div>
           </div>
         </div>
+        {/* Table */}
+        <Table users={users} history={history} activeGid={activeModule.id} />
       </div>
-      {/* Table */}
-      <Table users={users} history={history} activeGid={activeModule.id} />
-    </div>
+    </AdminHeader>
+  )
+}
+
+function AdminHeader({ children }) {
+  return (
+    <>
+      <Head>
+        <title>Admin Portal</title>
+        <meta name="description" content="Control the game" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      {children}
+    </>
   )
 }
