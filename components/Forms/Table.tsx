@@ -1,3 +1,4 @@
+import styles from '../../styles/Home.module.css'
 interface TableProps {
   users: IOClient[]
 }
@@ -45,8 +46,10 @@ export default function Table({ users }: TableProps) {
     <div className="card w-full bg-neutral text-neutral-content shadow-md">
       <div className="card-body text-center">
         <h2 className="card-title">Players Connected</h2>
-        <div className="overflow-x-auto">
-          <table className="table w-full">
+        <div
+          className={`overflow-x-auto overflow-y-scroll max-h-[875px] scrollbar-hide ${styles['no-scrollbar']}`}
+        >
+          <table className="table w-full ">
             <thead>
               <tr>
                 <th></th>
