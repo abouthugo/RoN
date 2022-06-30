@@ -107,7 +107,7 @@ export default function AdminPage() {
       <div className="grid grid-cols-8 place-content-center gap-10">
         <div className="card bg-base-100 shadow-md lg:col-span-2 sm:col-span-4">
           <div className="card-body">
-            <h2 className="card-title">Broadcast a message!</h2>
+            <h2 className="card-title">Broadcast</h2>
             <div className="card-actions justify-center">
               <input
                 name="message to users"
@@ -117,6 +117,7 @@ export default function AdminPage() {
                 placeholder="Type here"
                 className="input input-bordered w-full max-w-xs"
               />
+              <span className="">- {message.length} characters -</span>
             </div>
           </div>
         </div>
