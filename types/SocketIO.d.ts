@@ -4,7 +4,7 @@ interface ServerToClientEvents {
   clientList: (clients: IOClient[], history: ServerScoreLog[]) => void
   gameStateSync: (gameState: ServerGameState) => void
 }
-type Room = 'game-room' | 'waiting-room' | 'lobby'
+type Room = 'game-room' | 'waiting-room' | 'lobby' | 'stats-room'
 type IOClient = { name: string; id: string; room: Room; score: number }
 
 interface ClientToServerEvents {
@@ -15,6 +15,7 @@ interface ClientToServerEvents {
   setGate: (open: boolean) => void
   setGameModule: (gid: GameModuleId) => void
   updateScore: (score: number, gid: GameModuleId) => void
+  joinStats: () => void
 }
 
 interface InterServerEvents {
@@ -48,6 +49,11 @@ type ComponentConfigs =
       msgHandler: MessageHandler
       onClientUpdates: (s: IOClient[], history: ServerScoreLog[]) => void
       onSync: GameStateHandler
+    }
+  | {
+      path: '/kpis'
+      onClientUpdates: (s: IOClient[], history: ServerScoreLog[]) => void
+      onGameSync: GameStateHandler
     }
 type AdminSocketAPI = {
   sendMsg: (v: string) => void
