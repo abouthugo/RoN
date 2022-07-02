@@ -33,6 +33,7 @@ export default function socketIOHandler(
     io.on('connection', (socket) => {
       // This is like the general channel. It will act as a passer for when the user has not logged in yet but still needs to listen to events that happen in both rooms
       socket.join(LOBBY)
+      socket.data.visited = new Set()
 
       socket.on('message', (msg) => {
         gameState.message = msg
