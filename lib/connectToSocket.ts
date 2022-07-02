@@ -36,12 +36,16 @@ export default async function connectToSocket(config: ComponentConfigs) {
       const setGameModule = (gid: GameModuleId) => {
         socket.emit('setGameModule', gid)
       }
+
+      const resetScore = () => {
+        socket.emit('resetScores')
+      }
       socket.emit('authCheck')
       subToClientList(socket, config.onClientUpdates)
       subToGameSync(socket, config.onSync)
       onConnect(socket, config.onConnect)
 
-      return { sendMsg, requestSync, setGate, setGameModule }
+      return { sendMsg, requestSync, setGate, setGameModule, resetScore }
     }
     case '/kpis': {
       subToClientList(socket, config.onClientUpdates)

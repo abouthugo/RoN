@@ -52,6 +52,10 @@ export default function AdminPage() {
     socketAPI.setGameModule(id)
   }
 
+  const triggerReset = () => {
+    socketAPI.resetScore()
+  }
+
   const ModsComponent = () => {
     const list = GAME_MODULES.map((m) => {
       return (
@@ -135,7 +139,7 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className="grid card bg-base-100 shadow-md place-content-center lg:col-span-2 sm:col-span-4">
+          <div className="grid card bg-base-100 shadow-md lg:col-span-2 sm:col-span-4">
             <div className="card-body">
               <div className="class-actions">
                 <div className="form-control">
@@ -148,6 +152,12 @@ export default function AdminPage() {
                       checked={checked}
                     />
                   </label>
+                </div>
+                <div
+                  className="btn btn-warning btn-outline mt-5"
+                  onClick={triggerReset}
+                >
+                  Reset Scores
                 </div>
               </div>
             </div>

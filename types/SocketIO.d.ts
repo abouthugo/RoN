@@ -16,6 +16,7 @@ interface ClientToServerEvents {
   setGameModule: (gid: GameModuleId) => void
   updateScore: (score: number, gid: GameModuleId) => void
   joinStats: () => void
+  resetScores: () => void
 }
 
 interface InterServerEvents {
@@ -60,6 +61,7 @@ type AdminSocketAPI = {
   requestSync: () => void
   setGate: (open: boolean) => void
   setGameModule: (gid: GameModuleId) => void
+  resetScore: () => void
 }
 
 type UserSocketAPI = {

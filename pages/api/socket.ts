@@ -144,6 +144,21 @@ export default function socketIOHandler(
         io.to(STATS_ROOM).emit('clientList', reducedClients(clients), log)
         io.to(STATS_ROOM).emit('gameStateSync', gameState)
       })
+
+      socket.on('resetScores', async () => {
+        log = []
+        const sockets = await io.in(GAME_ROOM).fetchSockets()
+        for (const s of sockets) {
+          s.data.score = 0
+          s.data.visited = new Set()
+        }
+
+        io.to(adminId)
+          .to(STATS_ROOM)
+          .emit('clientList', reducedClients(clients), log)
+
+        console.log('scores were reset')
+      })
     })
   }
   res.end()
