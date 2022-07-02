@@ -4,6 +4,7 @@ import { Socket } from 'net'
 
 const GAME_ROOM = 'game-room'
 const WAITING_ROOM = 'waiting-room'
+const STATS_ROOM = 'stats-room'
 const LOBBY = 'lobby'
 
 export default function socketIOHandler(
@@ -12,7 +13,7 @@ export default function socketIOHandler(
 ) {
   const socket = res.socket as EnhancedSocket
   let clients: ServerSocket[] = []
-  const log: ServerScoreLog[] = []
+  let log: ServerScoreLog[] = []
   const gameState: ServerGameState = {
     message: 'Welcome!',
     open: false,
@@ -49,15 +50,20 @@ export default function socketIOHandler(
         clients.push(socket)
         console.log(`${name} entered the server`)
         if (adminId)
-          io.to(adminId).emit('clientList', reducedClients(clients), log)
+          io.to(adminId)
+            .to(STATS_ROOM)
+            .emit('clientList', reducedClients(clients), log)
         printClients(clients)
       })
 
       socket.conn.on('close', () => {
         clients = clients.filter((v) => v.id !== socket.id)
+        log = log.filter((v) => v.playerId !== socket.id)
         console.log(`${socket.data.name} left.`)
         if (adminId)
-          io.to(adminId).emit('clientList', reducedClients(clients), log)
+          io.to(adminId)
+            .to(STATS_ROOM)
+            .emit('clientList', reducedClients(clients), log)
         printClients(clients)
       })
 
@@ -84,11 +90,17 @@ export default function socketIOHandler(
           const gateState = open ? 'open' : 'closed'
           console.log(`admin triggered new state, gates are now ${gateState}`)
           gameState.open = open
-          socket.to(WAITING_ROOM).to(LOBBY).emit('gameStateSync', gameState)
+          socket
+            .to(WAITING_ROOM)
+            .to(LOBBY)
+            .to(STATS_ROOM)
+            .emit('gameStateSync', gameState)
           if (open) {
             io.in(WAITING_ROOM).socketsJoin(GAME_ROOM)
             io.socketsLeave(WAITING_ROOM)
-            io.to(adminId).emit('clientList', reducedClients(clients), log)
+            io.to(adminId)
+              .to(STATS_ROOM)
+              .emit('clientList', reducedClients(clients), log)
           }
           printClients(clients)
         }
@@ -98,7 +110,10 @@ export default function socketIOHandler(
         if (socket.id === adminId) {
           console.log(`Admin is now changing the game module to ${gid}`)
           gameState.activeModule = gid
-          io.to(WAITING_ROOM).to(LOBBY).emit('gameStateSync', gameState)
+          io.to(WAITING_ROOM)
+            .to(LOBBY)
+            .to(STATS_ROOM)
+            .emit('gameStateSync', gameState)
           // we don't want to kick players out when the gates are closed
           io.to(GAME_ROOM).emit('gameStateSync', { ...gameState, open: true })
         }
@@ -116,7 +131,17 @@ export default function socketIOHandler(
           playerId: socket.id,
           playerName: socket.data.name
         })
-        io.to(adminId).emit('clientList', reducedClients(clients), log)
+        io.to(adminId)
+          .to(STATS_ROOM)
+          .emit('clientList', reducedClients(clients), log)
+      })
+
+      socket.on('joinStats', () => {
+        console.log('Socket joined stats')
+        socket.leave(LOBBY)
+        socket.join(STATS_ROOM)
+        io.to(STATS_ROOM).emit('clientList', reducedClients(clients), log)
+        io.to(STATS_ROOM).emit('gameStateSync', gameState)
       })
     })
   }

@@ -43,6 +43,11 @@ export default async function connectToSocket(config: ComponentConfigs) {
 
       return { sendMsg, requestSync, setGate, setGameModule }
     }
+    case '/kpis': {
+      subToClientList(socket, config.onClientUpdates)
+      subToGameSync(socket, config.onGameSync)
+      socket.emit('joinStats')
+    }
   }
 }
 

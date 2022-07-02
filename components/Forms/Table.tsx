@@ -3,9 +3,15 @@ interface TableProps {
   users: IOClient[]
   history: ServerScoreLog[]
   activeGid: GameModuleId
+  hideIndicator?: boolean
 }
 
-export default function Table({ users, history, activeGid }: TableProps) {
+export default function Table({
+  users,
+  history,
+  activeGid,
+  hideIndicator
+}: TableProps) {
   const getScoreInHistory = (gid: GameModuleId, id: string) => {
     return history.find((i) => i.gid === gid && i.playerId === id)?.score || 0
   }
@@ -70,13 +76,15 @@ export default function Table({ users, history, activeGid }: TableProps) {
             <div className="stat-value">{user.score}</div>
           </div>
         </td>
-        <td>
-          <label className="swap swap-flip text-2xl">
-            <input type="checkbox" checked={historyExists(id)} />
-            <div className="swap-on">🎮</div>
-            <div className="swap-off">✅</div>
-          </label>
-        </td>
+        {!hideIndicator && (
+          <td>
+            <label className="swap swap-flip text-2xl">
+              <input type="checkbox" checked={historyExists(id)} />
+              <div className="swap-on">🎮</div>
+              <div className="swap-off">✅</div>
+            </label>
+          </td>
+        )}
       </tr>
     )
   })
@@ -98,7 +106,7 @@ export default function Table({ users, history, activeGid }: TableProps) {
                 <th>NMGR 🎲</th>
                 <th>SPSN 💎</th>
                 <th>Total Score</th>
-                <th></th>
+                {!hideIndicator && <th></th>}
               </tr>
             </thead>
             <tbody>{UserList}</tbody>
