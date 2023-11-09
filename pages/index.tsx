@@ -5,6 +5,7 @@ import { GlobalCtx } from '../context/GlobalCtx'
 import connectToSocket from '../lib/connectToSocket'
 import AppRouting from '../components/AppRouting'
 import { useRouter } from 'next/router'
+import { JSONTree } from 'react-json-tree'
 
 let socketAPI: UserSocketAPI
 const debugMode = false
@@ -48,9 +49,9 @@ export default function Home() {
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <main className="grid gap-4 max-w-xs mx-auto mt-10">
-            <div className={styles.card}>
-              <pre>
-                <code>&gt; {state.msg}</code>
+            <div className="mockup-code bg-black text-white overflow-auto">
+              <pre className="whitespace-pre-wrap">
+                <div className='pl-4'>{state.msg || " "}</div>
               </pre>
             </div>
             <div className="flex justify-start">
@@ -61,17 +62,15 @@ export default function Home() {
           </main>
         </div>
       </AppRouting>
-      {debugMode && <DebugComponent content={JSON.stringify(state, null, 2)} />}
+      {debugMode && <DebugComponent content={state} />}
     </>
   )
 }
 
 function DebugComponent({ content }) {
   return (
-    <textarea
-      className="textarea textarea-warning h-80 absolute bottom-1 right-1 w-60"
-      value={content}
-      readOnly
-    />
+    <div className="h-80 absolute bottom-1 right-1 w-120 overflow-auto bg-base-200 text-black rounded-md p-2">
+        <JSONTree data={content} />
+    </div>
   )
 }

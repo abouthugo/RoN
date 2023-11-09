@@ -2,10 +2,6 @@
   padding: 0 2rem;
 }
 
-.card {
-  @apply mockup-code bg-black text-white;
-}
-
 @keyframes cursor-blink {
   0% {
     opacity: 0;
