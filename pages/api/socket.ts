@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Server, Socket as IOSocket } from 'socket.io'
 import { Socket } from 'net'
+import logger from './logger'
 
 const GAME_ROOM = 'game-room'
 const WAITING_ROOM = 'waiting-room'
@@ -21,7 +22,7 @@ export default function socketIOHandler(
   }
   let adminId: string
   if (socket.server.io) {
-    console.log('Socket already running')
+    logger.info('Socket already running')
   } else {
     const io = new Server<
       ClientToServerEvents,
@@ -49,7 +50,7 @@ export default function socketIOHandler(
         else socket.join(WAITING_ROOM)
 
         clients.push(socket)
-        console.log(`${name} entered the server`)
+        logger.info(`${name} entered the server`)
         if (adminId)
           io.to(adminId)
             .to(STATS_ROOM)
@@ -60,7 +61,7 @@ export default function socketIOHandler(
       socket.conn.on('close', () => {
         clients = clients.filter((v) => v.id !== socket.id)
         log = log.filter((v) => v.playerId !== socket.id)
-        console.log(`${socket.data.name} left.`)
+        logger.info(`${socket.data.name} left.`)
         if (adminId)
           io.to(adminId)
             .to(STATS_ROOM)
@@ -70,8 +71,8 @@ export default function socketIOHandler(
 
       socket.on('authCheck', () => {
         socket.leave(LOBBY)
-        console.log('check emitted')
-        console.log(gameState)
+        logger.info('check emitted')
+        logger.info(gameState)
         adminId = socket.id
         io.to(adminId).emit('clientList', reducedClients(clients), log)
       })
@@ -89,7 +90,7 @@ export default function socketIOHandler(
       socket.on('setGate', (open) => {
         if (socket.id === adminId) {
           const gateState = open ? 'open' : 'closed'
-          console.log(`admin triggered new state, gates are now ${gateState}`)
+          logger.info(`admin triggered new state, gates are now ${gateState}`)
           gameState.open = open
           socket
             .to(WAITING_ROOM)
@@ -109,7 +110,7 @@ export default function socketIOHandler(
 
       socket.on('setGameModule', (gid) => {
         if (socket.id === adminId) {
-          console.log(`Admin is now changing the game module to ${gid}`)
+          logger.info(`Admin is now changing the game module to ${gid}`)
           gameState.activeModule = gid
           io.to(WAITING_ROOM)
             .to(LOBBY)
@@ -138,7 +139,7 @@ export default function socketIOHandler(
       })
 
       socket.on('joinStats', () => {
-        console.log('Socket joined stats')
+        logger.info('Socket joined stats')
         socket.leave(LOBBY)
         socket.join(STATS_ROOM)
         io.to(STATS_ROOM).emit('clientList', reducedClients(clients), log)
@@ -157,7 +158,7 @@ export default function socketIOHandler(
           .to(STATS_ROOM)
           .emit('clientList', reducedClients(clients), log)
 
-        console.log('scores were reset')
+        logger.info('scores were reset')
       })
     })
   }
@@ -170,7 +171,7 @@ function printClients(sockets: ServerSocket[]) {
     const { id } = socket
     return `${id} -> ${name} rooms: ${getRooms(socket).join(', ')}`
   })
-  console.log('Clients: ', socketList)
+  logger.info('Clients: ', socketList)
 }
 
 function reducedClients(sockets: ServerSocket[]): IOClient[] {
