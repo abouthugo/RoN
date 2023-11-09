@@ -46,7 +46,11 @@ export default function GlassSteppingStones() {
               return 150
           }
         }
-        state.userSocket.updateScore(score(), 'SPSN')
+        try {
+          state.userSocket.updateScore(score(), 'SPSN')
+        } catch (error) {
+          console.error('Failed to update score: ', error)
+        }
         setActiveLevel(-1)
       }, 250)
   }
@@ -126,7 +130,11 @@ export default function GlassSteppingStones() {
   const message = () => {
     switch (true) {
       case gameOver && activeLevel === totalLevels:
-        state.userSocket.updateScore(150, 'SPSN')
+        try {
+          state.userSocket.updateScore(150, 'SPSN')
+        } catch (error) {
+          console.error('Failed to update score: ', error)
+        }
         return 'YOU WIN! 🎉'
       case gameOver && activeLevel < 0:
         return '❌ Game over ❌'

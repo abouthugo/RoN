@@ -76,11 +76,14 @@ export default function GreenLightRedLight() {
 
   const onGameOver = (stop = false, score: number) => {
     if (stop) setMotionState('idle')
-    if (state.userSocket)
+    try {
       state.userSocket.updateScore(
         timeRemaining > 0 ? score * timeRemaining : score,
         'GLRL'
       )
+    } catch (error) {
+      console.error('Failed to update score: ', error)
+    }
   }
 
   if (gameover)

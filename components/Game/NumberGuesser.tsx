@@ -138,7 +138,11 @@ export default function NumberGuesser() {
         return '👀 Holy cow you guessed it! Enjoy your 30 points'
       case gameOver:
         const points = hintTaken === 'taken' ? getSum() / 2 : getSum()
-        state.userSocket.updateScore(points, 'NMGR')
+        try {
+          state.userSocket.updateScore(points, 'NMGR')
+        } catch (error) {
+          console.error('Failed to update score: ', error)
+        }
         return `You get ${points} points.`
       case hintTaken === 'taken' && getSelection().count > 0 && guessLocked:
         return 'Select your last cell'
